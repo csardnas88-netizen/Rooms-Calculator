@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Distribución de Cuartos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222222;
+    --border: #2e2e2e;
+    --accent: #d4ff6e;
+    --text: #f0f0e8;
+    --text-muted: #888880;
+    --amber: #f5c842;
+    --amber-bg: #2a2210;
+    --amber-border: #5a4500;
+    --green: #4ecb71;
+    --green-bg: #0d2016;
+    --green-border: #1a4028;
+    --purple: #c084fc;
+    --purple-bg: #1e1228;
+    --purple-border: #4a2878;
+    --purple-avatar: #2e1a50;
+    --coral: #fb8b6e;
+    --coral-bg: #281510;
+    --coral-border: #6b3020;
+    --coral-avatar: #3d1e10;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  header {
+    padding: 2rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  header h1 { font-size: 22px; font-weight: 600; line-height: 1.2; }
+  header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex: 1;
+    min-width: 90px;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    -webkit-user-select: none;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .tab.active.t-hk   { color: var(--text); border-bottom-color: var(--accent); }
+  .tab.active.t-sup  { color: var(--purple); border-bottom-color: var(--purple); }
+  .tab.active.t-ra   { color: var(--coral); border-bottom-color: var(--coral); }
+
+  .tab-icon { font-size: 15px; display: block; margin-bottom: 2px; }
+
+  /* PANELS */
+  .panel { display: none; padding: 1.5rem; }
+  .panel.active { display: block; }
+
+  /* INPUT GRID */
+  .input-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .field {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .field-row { display: flex; align-items: center; gap: 8px; }
+
+  .field input {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--text);
+    width: 100%;
+    -moz-appearance: textfield;
+  }
+
+  .field input::-webkit-inner-spin-button,
+  .field input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  .btn-group { display: flex; flex-direction: column; gap: 4px; }
+
+  .btn-sm {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 28px; height: 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    -webkit-user-select: none; user-select: none;
+  }
+  .btn-sm:active { background: var(--accent); color: #000; }
+
+  /* SUMMARY */
+  .summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .stat .s-label {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .stat .s-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .stat .s-value.purple { color: var(--purple); }
+  .stat .s-value.coral  { color: var(--coral); }
+
+  .stat .s-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  .section-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* ROWS */
+  .hk-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .hk-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .hk-row.is-extra  { border-color: var(--amber-border);  background: var(--amber-bg); }
+  .hk-row.is-sup    { border-color: var(--purple-border); background: var(--purple-bg); }
+  .hk-row.is-ra     { border-color: var(--coral-border);  background: var(--coral-bg); }
+  .hk-row.is-ra-ex  { border-color: var(--coral-border);  background: var(--coral-bg); }
+
+  .hk-left { display: flex; align-items: center; gap: 12px; }
+
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; font-weight: 500;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .hk-row.is-extra .avatar  { background: #3a2e00; border-color: var(--amber-border);  color: var(--amber); }
+  .hk-row.is-sup   .avatar  { background: var(--purple-avatar); border-color: var(--purple-border); color: var(--purple); }
+  .hk-row.is-ra    .avatar,
+  .hk-row.is-ra-ex .avatar  { background: var(--coral-avatar); border-color: var(--coral-border); color: var(--coral); }
+
+  .hk-name { font-size: 14px; font-weight: 500; color: var(--text); }
+
+  .hk-badge {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 20px;
+    margin-top: 3px;
+    display: inline-block;
+  }
+
+  .badge-extra  { background: #3a2e00; color: var(--amber);  border: 1px solid var(--amber-border); }
+  .badge-normal { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .badge-sup    { background: var(--purple-avatar); color: var(--purple); border: 1px solid var(--purple-border); }
+  .badge-ra     { background: var(--coral-avatar); color: var(--coral); border: 1px solid var(--coral-border); }
+  .badge-ra-ex  { background: var(--coral-avatar); color: var(--coral); border: 1px solid var(--coral-border); }
+
+  .hk-rooms {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px; font-weight: 500;
+    color: var(--text);
+  }
+
+  .hk-row.is-extra  .hk-rooms { color: var(--amber); }
+  .hk-row.is-sup    .hk-rooms { color: var(--purple); }
+  .hk-row.is-ra     .hk-rooms,
+  .hk-row.is-ra-ex  .hk-rooms { color: var(--coral); }
+
+  .hk-unit { font-size: 12px; color: var(--text-muted); margin-top: 2px; text-align: right; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+  /* INFO BOX */
+  .info-box {
+    border-radius: 14px;
+    padding: 13px 15px;
+    margin-bottom: 1.5rem;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .info-box.purple { background: var(--purple-bg); border: 1px solid var(--purple-border); }
+  .info-box.coral  { background: var(--coral-bg);  border: 1px solid var(--coral-border); }
+  .info-box .icon  { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .info-box p      { font-size: 13px; line-height: 1.5; }
+  .info-box.purple p { color: var(--purple); }
+  .info-box.coral  p { color: var(--coral); }
+  .info-box strong { font-weight: 600; }
+
+  footer {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">Housekeeping Tool</div>
+  <h1>Distribución<br>de Cuartos</h1>
+  <p>Ingresa los totales y ve la asignación al instante</p>
+</header>
+
+<div class="tabs">
+  <div class="tab t-hk active"  onclick="switchTab('hk',this)">
+    <span class="tab-icon">🛏</span>Houseman
+  </div>
+  <div class="tab t-sup" onclick="switchTab('sup',this)">
+    <span class="tab-icon">📋</span>Supervisores
+  </div>
+  <div class="tab t-ra"  onclick="switchTab('ra',this)">
+    <span class="tab-icon">🧹</span>Room Attendants
+  </div>
+</div>
+
+<!-- ── PANEL: HOUSEKEEPERS ── -->
+<div class="panel active" id="panel-hk">
+  <div class="input-section">
+    <div class="field">
+      <label>Total cuartos</label>
+      <div class="field-row">
+        <input type="number" id="rooms-hk" value="50" min="1" max="999" inputmode="numeric">
+        <div class="btn-group">
+          <button class="btn-sm" onclick="adj('rooms-hk',1)">+</button>
+          <button class="btn-sm" onclick="adj('rooms-hk',-1)">−</button>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Houseman</label>
+      <div class="field-row">
+        <input type="number" id="staff-hk" value="4" min="1" max="99" inputmode="numeric">
+        <div class="btn-group">
+          <button class="btn-sm" onclick="adj('staff-hk',1)">+</button>
+          <button class="btn-sm" onclick="adj('staff-hk',-1)">−</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="input-section" style="margin-bottom:1.5rem;">
+    <div class="field" style="border-color:#3a3a1a;">
+      <label style="color:#a0a060;">Stayovers (se deducen)</label>
+      <div class="field-row">
+        <input type="number" id="stay-hk" value="15" min="0" max="999" inputmode="numeric" style="color:#d4c94a;">
+        <div class="btn-group">
+          <button class="btn-sm" onclick="adj('stay-hk',1)">+</button>
+          <button class="btn-sm" onclick="adj('stay-hk',-1)">−</button>
+        </div>
+      </div>
+    </div>
+    <div class="field" style="border-color:#1a3040;">
+      <label style="color:#6090a0;">Pilotos (se deducen)</label>
+      <div class="field-row">
+        <input type="number" id="pilot-hk" value="0" min="0" max="999" inputmode="numeric" style="color:#70c0e0;">
+        <div class="btn-group">
+          <button class="btn-sm" onclick="adj('pilot-hk',1)">+</button>
+          <button class="btn-sm" onclick="adj('pilot-hk',-1)">−</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="summary" id="hk-summary"></div>
+  <hr class="divider">
+  <p class="section-label">Asignación individual</p>
+  <div class="hk-list" id="hkList"></div>
+</div>
+
+<!-- ── PANEL: SUPERVISORES ── -->
+<div class="panel" id="panel-sup">
+  <div class="info-box purple">
+    <span class="icon">ℹ️</span>
+    <p>Los stayovers se sincronizan con la pestaña Houseman automáticamente.</p>
+  </div>
+  <div class="input-section">
+    <div class="field">
+      <label>Total cuartos</label>
+      <div class="field-row">
+        <input type="number" id="rooms-sup" value="50" min="1" max="999" inputmode="numeric">
+        <div class="btn-group">
+          <button class="btn-sm" onclick="adj('rooms-sup',1)">+</button>
+          <button class="btn-sm" onclick="adj('rooms-sup',-1)">−</button>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Supervisores</label>
+      <div class="field-row">
+        <input type="number" id="staff-sup" value="2" min="1" max="20" inputmode="numeric">
+        <div class="btn-group">
+          <button class="btn-sm" onclick="adj('staff-sup',1)">+</button>
+          <button class="btn-sm" onclick="adj('staff-sup',-1)">−</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="input-section" style="margin-bottom:1.5rem;">
+    <div class="field" style="border-color:#3a3a1a;">
+      <label style="color:#a0a060;">Stayovers (se deducen)</label>
+      <div class="field-row">
+        <input type="number" id="stay-sup" value="15" min="0" max="999" inputmode="numeric" style="color:#d4c94a;" readonly>
+        <div class="btn-group">
+          <button class="btn-sm" onclick="adj('stay-hk',1)">+</button>
+          <button class="btn-sm" onclick="adj('stay-hk',-1)">−</button>
+        </div>
+      </div>
+    </div>
+    <div class="field" style="border-color:#1a3040;">
+      <label style="color:#6090a0;">Pilotos (se deducen)</label>
+      <div class="field-row">
+        <input type="number" id="pilot-sup" value="0" min="0" max="999" inputmode="numeric" style="color:#70c0e0;" readonly>
+        <div class="btn-group">
+          <button class="btn-sm" onclick="adj('pilot-hk',1)">+</button>
+          <button class="btn-sm" onclick="adj('pilot-hk',-1)">−</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="summary" id="sup-summary"></div>
+  <hr class="divider">
+  <p class="section-label">Cuartos a supervisar</p>
+  <div class="hk-list" id="supList"></div>
+</div>
+
+<!-- ── PANEL: ROOM ATTENDANTS ── -->
+<div class="panel" id="panel-ra">
+  <div class="info-box coral">
+    <span class="icon">ℹ️</span>
+    <p>Ingresa el total de cuartos y el desglose de <strong>checados</strong> (due outs + vacantes) para verlos en el resumen.</p>
+  </div>
+  <div class="input-section">
+    <div class="field">
+      <label>Total cuartos</label>
+      <div class="field-row">
+        <input type="number" id="rooms-ra" value="60" min="1" max="999" inputmode="numeric">
+        <div class="btn-group">
+          <button class="btn-sm" onclick="adj('rooms-ra',1)">+</button>
+          <button class="btn-sm" onclick="adj('rooms-ra',-1)">−</button>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Room Att.</label>
+      <div class="field-row">
+        <input type="number" id="staff-ra" value="5" min="1" max="99" inputmode="numeric">
+        <div class="btn-group">
+          <button class="btn-sm" onclick="adj('staff-ra',1)">+</button>
+          <button class="btn-sm" onclick="adj('staff-ra',-1)">−</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="field" style="margin-bottom:1.5rem; border-color:#6b3020;">
+    <label style="color:#c07060;">Due outs + Vacantes (checados)</label>
+    <div class="field-row">
+      <input type="number" id="checked-ra" value="0" min="0" max="999" inputmode="numeric" style="color:#fb8b6e;">
+      <div class="btn-group">
+        <button class="btn-sm" onclick="adj('checked-ra',1)">+</button>
+        <button class="btn-sm" onclick="adj('checked-ra',-1)">−</button>
+      </div>
+    </div>
+  </div>
+  <div class="summary" id="ra-summary"></div>
+  <hr class="divider">
+  <p class="section-label">Asignación individual</p>
+  <div class="hk-list" id="raList"></div>
+</div>
+
+<footer>calculadora housekeeping · uso interno</footer>
+
+<script>
+  function switchTab(id, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('panel-' + id).classList.add('active');
+  }
+
+  function adj(id, delta) {
+    const el = document.getElementById(id);
+    const min = parseInt(el.min) || 1;
+    const val = Math.max(min, (parseInt(el.value) || 0) + delta);
+    el.value = val;
+    syncRooms(id, val);
+    calcAll();
+  }
+
+  function syncRooms(changedId, val) {
+    if (changedId === 'rooms-hk')  document.getElementById('rooms-sup').value = val;
+    if (changedId === 'rooms-sup') document.getElementById('rooms-hk').value  = val;
+    if (changedId === 'stay-hk')   document.getElementById('stay-sup').value  = val;
+    if (changedId === 'pilot-hk')  document.getElementById('pilot-sup').value = val;
+  }
+
+  function buildRows(containerId, count, base, extra, rowClass, badgeClass, badgeExtraClass, prefix, accentClass) {
+    let html = '';
+    for (let i = 1; i <= Math.min(count, 60); i++) {
+      const isExtra = i <= extra;
+      const rooms = isExtra ? base + 1 : base;
+      html += `
+        <div class="hk-row ${isExtra ? rowClass + '-ex' : rowClass}">
+          <div class="hk-left">
+            <div class="avatar">${prefix}${i}</div>
+            <div>
+              <div class="hk-name">${prefix === 'H' ? 'Houseman' : prefix === 'S' ? 'Supervisor' : 'Room Attendant'} ${i}</div>
+              <span class="hk-badge ${isExtra ? badgeExtraClass : badgeClass}">${isExtra ? '+1 extra' : 'normal'}</span>
+            </div>
+          </div>
+          <div>
+            <div class="hk-rooms">${rooms}</div>
+            <div class="hk-unit">cuartos</div>
+          </div>
+        </div>`;
+    }
+    document.getElementById(containerId).innerHTML = html;
+  }
+
+  function calcHK() {
+    const total  = Math.max(0, parseInt(document.getElementById('rooms-hk').value) || 0);
+    const stay   = Math.max(0, parseInt(document.getElementById('stay-hk').value)  || 0);
+    const pilot  = Math.max(0, parseInt(document.getElementById('pilot-hk').value) || 0);
+    const staff  = Math.max(1, parseInt(document.getElementById('staff-hk').value) || 1);
+    const net    = Math.max(0, total - stay - pilot);
+    const base   = Math.floor(net / staff);
+    const extra  = net % staff;
+    document.getElementById('hk-summary').innerHTML = `
+      <div class="stat"><div class="s-label">Total</div><div class="s-value">${total}</div><div class="s-desc">− ${stay} stay · − ${pilot} pilotos = ${net}</div></div>
+      <div class="stat"><div class="s-label">Base por Houseman</div><div class="s-value">${base}</div><div class="s-desc">${extra} con +1 extra</div></div>`;
+    buildRows('hkList', staff, base, extra, 'is-extra', 'badge-normal', 'badge-extra', 'H');
+  }
+
+  function calcSup() {
+    const total  = Math.max(0, parseInt(document.getElementById('rooms-sup').value) || 0);
+    const stay   = Math.max(0, parseInt(document.getElementById('stay-sup').value)  || 0);
+    const pilot  = Math.max(0, parseInt(document.getElementById('pilot-sup').value) || 0);
+    const staff  = Math.max(1, parseInt(document.getElementById('staff-sup').value) || 1);
+    const net    = Math.max(0, total - stay - pilot);
+    const base   = Math.floor(net / staff);
+    const extra  = net % staff;
+    document.getElementById('sup-summary').innerHTML = `
+      <div class="stat"><div class="s-label">Total</div><div class="s-value purple">${total}</div><div class="s-desc">− ${stay} stay · − ${pilot} pilotos = ${net}</div></div>
+      <div class="stat"><div class="s-label">Base por Supervisor</div><div class="s-value purple">${base}</div><div class="s-desc">${extra} con +1 extra</div></div>`;
+    buildRows('supList', staff, base, extra, 'is-sup', 'badge-sup', 'badge-sup', 'S');
+  }
+
+  function calcRA() {
+    const total   = Math.max(1, parseInt(document.getElementById('rooms-ra').value)   || 0);
+    const staff   = Math.max(1, parseInt(document.getElementById('staff-ra').value)   || 1);
+    const checked = Math.max(0, parseInt(document.getElementById('checked-ra').value) || 0);
+    const baseR   = Math.floor(total   / staff);
+    const extraR  = total   % staff;
+    const baseC   = Math.floor(checked / staff);
+    const extraC  = checked % staff;
+    document.getElementById('ra-summary').innerHTML = `
+      <div class="stat"><div class="s-label">Total cuartos</div><div class="s-value coral">${total}</div><div class="s-desc">base por RA: ${baseR} · ${extraR} con +1</div></div>
+      <div class="stat"><div class="s-label">Checados</div><div class="s-value coral">${checked}</div><div class="s-desc">base por RA: ${baseC} · ${extraC} con +1</div></div>`;
+    buildRARows('raList', staff, baseR, extraR, baseC, extraC);
+  }
+
+  function buildRARows(containerId, count, baseR, extraR, baseC, extraC) {
+    let html = '';
+    for (let i = 1; i <= Math.min(count, 60); i++) {
+      const hasExtraR = i <= extraR;
+      const hasExtraC = i <= extraC;
+      const rooms   = hasExtraR ? baseR + 1 : baseR;
+      const chk     = hasExtraC ? baseC + 1 : baseC;
+      html += `
+        <div class="hk-row is-ra">
+          <div class="hk-left">
+            <div class="avatar">R${i}</div>
+            <div>
+              <div class="hk-name">Room Attendant ${i}</div>
+              <span class="hk-badge badge-ra">${hasExtraR ? '+1 cuarto' : 'normal'}</span>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div class="hk-rooms">${rooms}</div>
+            <div class="hk-unit">cuartos</div>
+            <div style="margin-top:6px; font-family:'DM Mono',monospace; font-size:13px; color:#fb8b6e; font-weight:500;">${chk} <span style="font-size:11px; color:var(--text-muted); font-weight:400;">checados</span></div>
+          </div>
+        </div>`;
+    }
+    document.getElementById(containerId).innerHTML = html;
+  }
+
+  function calcAll() { calcHK(); calcSup(); calcRA(); }
+
+  /* input listeners */
+  ['rooms-hk','staff-hk','stay-hk','pilot-hk'].forEach(id => document.getElementById(id).addEventListener('input', function() {
+    if (id === 'rooms-hk')  { document.getElementById('rooms-sup').value  = this.value; }
+    if (id === 'stay-hk')   { document.getElementById('stay-sup').value   = this.value; }
+    if (id === 'pilot-hk')  { document.getElementById('pilot-sup').value  = this.value; }
+    calcAll();
+  }));
+  ['rooms-sup','staff-sup'].forEach(id => document.getElementById(id).addEventListener('input', function() {
+    if (id === 'rooms-sup') document.getElementById('rooms-hk').value = this.value;
+    calcAll();
+  }));
+  ['rooms-ra','staff-ra','checked-ra'].forEach(id => document.getElementById(id).addEventListener('input', calcAll));
+
+  calcAll();
+</script>
+</body>
+</html>
